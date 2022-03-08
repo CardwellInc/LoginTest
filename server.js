@@ -11,15 +11,24 @@ const flash = require('express-flash')
 const session = require('express-session')
 const methodOverride = require('method-override')
 
-const initializePassport = require('./passport-config')
-initializePassport(
-    passport, 
-    username => users.find(user => user.username === username),
-    id => users.find(user => user.id === id)
-)
+
+
+const mongoose = require('mongoose')
+mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true })
+const db = mongoose.connection
+db.on('error', error => console.error(error))
+db.once('open', () => console.log('Connected to Mongoose'))
 
 
 const users = []
+
+
+const initializePassport = require('./passport-config')
+initializePassport(
+    passport, 
+    username => users.find(users => users.username === username),
+    id => users.find(users => users.id === id)
+)
 
 
 
@@ -117,11 +126,7 @@ function checkNotAuthenticated(req, res, next) {
     next()
 }
 
-const mongoose = require('mongoose')
-mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true })
-const db = mongoose.connection
-db.on('error', error => console.error(error))
-db.once('open', () => console.log('Connected to Mongoose'))
+
 
 const indexRouter = require('./routes/index')
 
