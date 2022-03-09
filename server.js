@@ -63,7 +63,7 @@ app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
     failureFlash: true
 }))
 
-app.get('/register', checkNotAuthenticated, (req, res) => {
+app.get('/CMWCardwell', checkNotAuthenticated, (req, res) => {
     res.render('register.ejs')
 })
 
