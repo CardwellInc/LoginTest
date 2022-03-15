@@ -2,7 +2,7 @@
   "name": "login-test-server",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "devStart": "nodemon server.js"
   },
@@ -19,7 +19,8 @@
     "mongodb": "^4.4.0",
     "mongoose": "^6.2.4",
     "passport": "^0.5.2",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "passport-local-mongoose": "^7.0.0"
   },
   "devDependencies": {
     "dotenv": "^16.0.0",

@@ -1,46 +1,65 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
-var bcrypt = require('bcrypt');
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+const passport = require('passport');
 
-var UserSchema = new Schema({
-  username: {
+const passportLocalMongoose = require('passport-local-mongoose');
+
+const userSchema = new mongoose.Schema({
+    name: {
         type: String,
-        unique: true,
-        required: true
+        required: true,
     },
-  password: {
+    username: {
         type: String,
-        required: true
+        required: true,
+        unique: true,
+    },
+    password: {
+        type: String,
+        required: true,
     }
 });
 
-UserSchema.pre('save', function (next) {
-    var user = this;
-    if (this.isModified('password') || this.isNew) {
-        bcrypt.genSalt(10, function (err, salt) {
-            if (err) {
-                return next(err);
-            }
-            bcrypt.hash(user.password, salt, null, function (err, hash) {
-                if (err) {
-                    return next(err);
-                }
-                user.password = hash;
-                next();
-            });
+userSchema.pre('save', function(next) {
+    if(this.isModified('password')){
+        bcrypt.hash(this.password, 10, (err, hash) => {
+            if(err) return next(err);
+
+            this.password = hash;
+            next();
         });
-    } else {
-        return next();
     }
 });
 
-UserSchema.methods.comparePassword = function (passw, cb) {
-    bcrypt.compare(passw, this.password, function (err, isMatch) {
-        if (err) {
-            return cb(err);
-        }
-        cb(null, isMatch);
-    });
+
+userSchema.methods.comparePassword = async function (password) {
+    if(!password) throw new Error('Password cannot Compare.');
+
+    try {
+        const result = await bcrypt.compare(password, this.password);
+        return result;
+    } catch (error) {
+        console.log('Error While Comparing Passwords', error.message);
+    };
 };
 
-module.exports = mongoose.model('User', UserSchema);
+userSchema.statics.isThisUsernameInUse = async function(username) {
+    if (!username) throw new Error('Invalid Username');
+    try {
+        const user = await this.findOne({ username });
+        if (user) return false;
+
+        return true;
+    } catch (error) {
+        console.log('error with isThisUsernameInUse', error.message)
+        return false;
+    };
+};
+
+
+userSchema.plugin(passportLocalMongoose);
+
+
+
+
+module.exports = mongoose.model('User', userSchema);
